@@ -1,0 +1,21 @@
+server: 
+   port: 8285
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/empDB
+    username: root
+    password: 
+    dialect: org.hibernate.dialect.MySQL8Dialect
+  jpa:
+    hibernate.ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+springdoc:
+   swagger-ui:
+      path: /swagger-ui.html
+   api-docs:
+      path: /openapi/v3/api-docs
+   packagesToScan: com.motorola.io.motogp.controller
+   pathsToMatch: /**
+    
