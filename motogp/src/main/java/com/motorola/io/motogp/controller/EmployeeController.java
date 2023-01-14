@@ -103,6 +103,21 @@ public class EmployeeController {
 		return new ResponseEntity<Employee>(emp, HttpStatus.FOUND);
 
 	}
+	
+	@GetMapping("/cache/clear")
+	@Operation(summary = "Clear the Browser cache", description = "to clear the browser cache")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
+			@ApiResponse(responseCode = "400", description = "BAD_REQUEST", content = {
+					@Content(examples = { @ExampleObject(value = "") }) }),
+			@ApiResponse(responseCode = "404", description = "NOT_FOUND", content = {
+					@Content(examples = { @ExampleObject(value = "") }) }) })
+	public ResponseEntity<HttpServletResponse> clearCache(HttpServletResponse httpResponse) {
+		httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+		httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+		httpResponse.setDateHeader("Expires", 0); // Proxies.
+		return new ResponseEntity<HttpServletResponse>(httpResponse, HttpStatus.OK);
+
+	}
 
 
 }
