@@ -2,6 +2,8 @@ package com.motorola.io.motogp.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +25,17 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/employee")
 @Tag(description = "Employee resources that provides access to availabe Employee data", name = "Employee Resource")
 public class EmployeeController {
+	
+	private static final Logger L=LoggerFactory.getLogger(EmployeeController.class);
 
 	@Autowired
-	IEmployeeService empService;
+	IEmployeeService employeeService;
 	
 	@GetMapping("/test")
 	public String test() {
@@ -45,7 +50,7 @@ public class EmployeeController {
 			@ApiResponse(responseCode = "404", description = "NOT_FOUND", content = {
 					@Content(examples = { @ExampleObject(value = "") }) }) })
 	public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
-		Employee emp = empService.addEmployee(employee);
+		Employee emp = employeeService.addEmployee(employee);
 		return new ResponseEntity<Employee>(emp, HttpStatus.ACCEPTED);
 
 	}
@@ -58,7 +63,7 @@ public class EmployeeController {
 			@ApiResponse(responseCode = "404", description = "NOT_FOUND", content = {
 					@Content(examples = { @ExampleObject(value = "") }) }) })
 	public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee) {
-		Employee emp = empService.updateEmployee(employee);
+		Employee emp = employeeService.updateEmployee(employee);
 		return new ResponseEntity<Employee>(emp, HttpStatus.ACCEPTED);
 
 	}
@@ -72,7 +77,7 @@ public class EmployeeController {
 			@ApiResponse(responseCode = "404", description = "NOT_FOUND", content = {
 					@Content(examples = { @ExampleObject(value = "") }) }) })
 	public ResponseEntity<List<Employee>> fetchEmployee() {
-		List<Employee> emp = empService.getEmployee();
+		List<Employee> emp = employeeService.getEmployee();
 		return new ResponseEntity<List<Employee>>(emp, HttpStatus.FOUND);
 
 	}
@@ -86,7 +91,7 @@ public class EmployeeController {
 			@ApiResponse(responseCode = "404", description = "NOT_FOUND", content = {
 					@Content(examples = { @ExampleObject(value = "") }) }) })
 	public ResponseEntity<Employee> fetchEmployeeById(@RequestParam("id") long id) {
-		Employee emp = empService.getEmployeeById(id);
+		Employee emp = employeeService.getEmployeeById(id);
 		return new ResponseEntity<Employee>(emp, HttpStatus.FOUND);
 
 	}
@@ -99,10 +104,11 @@ public class EmployeeController {
 			@ApiResponse(responseCode = "404", description = "NOT_FOUND", content = {
 					@Content(examples = { @ExampleObject(value = "") }) }) })
 	public ResponseEntity<Employee> deleteEmployeeById(@RequestParam("id") long id) {
-		Employee emp = empService.deleteEmployeeById(id);
+		Employee emp = employeeService.deleteEmployeeById(id);
 		return new ResponseEntity<Employee>(emp, HttpStatus.FOUND);
 
 	}
+	
 	
 	@GetMapping("/cache/clear")
 	@Operation(summary = "Clear the Browser cache", description = "to clear the browser cache")

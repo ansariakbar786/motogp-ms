@@ -1,8 +1,8 @@
 server: 
-   port: 8285
+   port: 8087
 spring:
   datasource:
-    driverClassName: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/empDB
     username: root
     password: 
@@ -11,6 +11,14 @@ spring:
     hibernate.ddl-auto: update
     generate-ddl: true
     show-sql: true
+  data: 
+     mongodb: 
+       authentication-database: admin
+       database: customerDB
+       username: admin
+       password: password
+       host: 127.0.0.1
+       #uri: mongodb://localhost:27017/customerDB
 springdoc:
    swagger-ui:
       path: /swagger-ui.html
