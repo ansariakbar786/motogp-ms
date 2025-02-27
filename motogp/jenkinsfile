@@ -1,0 +1,75 @@
+pipeline {
+    agent any // Use any available agent node
+
+    environment {
+        // Define global environment variables
+        MVN = tool 'DefaultMaven'  // Use the Maven tool configured in Jenkins Global Tool Configuration
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=true' //Useful so tests don't stop the build from archiving.
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git(
+                    url: 'https://github.com/your-username/your-repo.git', // Replace with your repository URL
+                    credentialsId: 'github-credentials',  // Replace with your Git credentials ID (if private repo)
+                    branch: 'main' // Replace with your branch name
+                )
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    try {
+                        sh "${MVN} clean install ${MAVEN_OPTS} -e -B"
+                    } catch (Exception e) {
+                        echo "Maven build failed: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE' //Explicitly set the status to failure.
+                        throw e  //Re-throw exception to stop the pipeline.
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+           steps {
+                script {
+                    try {
+                       //Execute tests as part of the build stage
+                    } catch (Exception e) {
+                        echo "Tests failed: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+           }
+        }
+
+        stage('Archive Artifacts') {
+            when {
+                expression { currentBuild.result == 'SUCCESS' } // Only archive on success
+            }
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+    }
+    post {
+        always {
+            echo "Build finished with status: ${currentBuild.result}"
+            // Clean up workspace (optional)
+            //deleteDir()  // Be careful! This will delete the workspace after every build.
+        }
+        failure {
+            // Send failure notification
+            echo "Sending failure notification..."
+            // Replace this with your actual notification logic (e.g., email, Slack)
+        }
+        success {
+            // Send success notification
+            echo "Sending success notification..."
+            // Replace this with your actual notification logic
+        }
+    }
+}
