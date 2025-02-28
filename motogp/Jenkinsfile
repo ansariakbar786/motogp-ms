@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.6-jdk-11' // Or your preferred Maven and JDK version
-            args '-v $HOME/.m2:/root/.m2' // Optional: Cache Maven dependencies
-        }
-    }
+    agent any
     stages {
         stage('Example Stage') {
             steps {
@@ -13,26 +8,16 @@ pipeline {
         }
         stage('Checkout') {
             steps {
+                echo 'Starting checkout...'
                 git branch: 'main', url: 'https://github.com/ansariakbar786/motogp-ms.git'
+                echo 'Checkout complete.'
             }
         }
-        stage('Maven Build') {
+        stage('Build') {
             steps {
-                sh 'mvn clean install' // Or your preferred Maven goals
-            }
-        }
-        stage('Quality Checks') {
-            steps {
-                sh 'mvn pmd:pmd' //Optional: PMD Integration
-            }
-        }
-        stage('Deploy') {
-            when {
-                branch 'main' // Deploy only from main branch
-            }
-            steps {
-                // Add your deployment steps here (e.g., deploying to a server, pushing a Docker image)
-                echo "Deploying application..."
+                echo 'Starting build...'
+                sh 'mvn clean install'
+                echo 'Build complete.'
             }
         }
     }
