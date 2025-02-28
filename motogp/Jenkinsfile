@@ -6,6 +6,11 @@ pipeline {
         }
     }
     stages {
+        stage('Example Stage') {
+            steps {
+                echo 'Hello, world!'
+            }
+        }
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/ansariakbar786/motogp-ms.git'
