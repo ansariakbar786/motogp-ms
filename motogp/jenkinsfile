@@ -1,75 +1,46 @@
 pipeline {
-    agent any // Use any available agent node
-
-    environment {
-        // Define global environment variables
-        MVN = tool 'DefaultMaven'  // Use the Maven tool configured in Jenkins Global Tool Configuration
-        MAVEN_OPTS = '-Dmaven.test.failure.ignore=true' //Useful so tests don't stop the build from archiving.
+    agent {
+        docker {
+            image 'maven:3.8.6-jdk-11' // Or your preferred Maven and JDK version
+            args '-v $HOME/.m2:/root/.m2' // Optional: Cache Maven dependencies
+        }
     }
-
     stages {
         stage('Checkout') {
             steps {
-                git(
-                    url: 'https://github.com/your-username/your-repo.git', // Replace with your repository URL
-                    credentialsId: 'github-credentials',  // Replace with your Git credentials ID (if private repo)
-                    branch: 'main' // Replace with your branch name
-                )
+                git branch: 'main', url: 'https://github.com/ansariakbar786/motogp-ms.git'
             }
         }
-
-        stage('Build') {
+        stage('Maven Build') {
             steps {
-                script {
-                    try {
-                        sh "${MVN} clean install ${MAVEN_OPTS} -e -B"
-                    } catch (Exception e) {
-                        echo "Maven build failed: ${e.getMessage()}"
-                        currentBuild.result = 'FAILURE' //Explicitly set the status to failure.
-                        throw e  //Re-throw exception to stop the pipeline.
-                    }
-                }
+                sh 'mvn clean install' // Or your preferred Maven goals
             }
         }
-
-        stage('Test') {
-           steps {
-                script {
-                    try {
-                       //Execute tests as part of the build stage
-                    } catch (Exception e) {
-                        echo "Tests failed: ${e.getMessage()}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-           }
+        stage('Quality Checks') {
+            steps {
+                sh 'mvn pmd:pmd' //Optional: PMD Integration
+            }
         }
-
-        stage('Archive Artifacts') {
+        stage('Deploy') {
             when {
-                expression { currentBuild.result == 'SUCCESS' } // Only archive on success
+                branch 'main' // Deploy only from main branch
             }
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                // Add your deployment steps here (e.g., deploying to a server, pushing a Docker image)
+                echo "Deploying application..."
             }
         }
     }
     post {
         always {
-            echo "Build finished with status: ${currentBuild.result}"
-            // Clean up workspace (optional)
-            //deleteDir()  // Be careful! This will delete the workspace after every build.
-        }
-        failure {
-            // Send failure notification
-            echo "Sending failure notification..."
-            // Replace this with your actual notification logic (e.g., email, Slack)
+            // Clean up tasks
+            echo "Pipeline completed."
         }
         success {
-            // Send success notification
-            echo "Sending success notification..."
-            // Replace this with your actual notification logic
+            echo "Build succeeded!"
+        }
+        failure {
+            echo "Build failed!"
         }
     }
 }
